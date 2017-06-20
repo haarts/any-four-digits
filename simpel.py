@@ -1,4 +1,5 @@
 import requests
+import math
 import json
 from bs4 import BeautifulSoup
 
@@ -9,7 +10,8 @@ headers = {
         }
 
 def post(data):
-    print(data)
+    print("POSTing %s to %s" % (data, ip))
+    requests.post("http://" + ip + "/", data=data)
 
 # Get the CSRF token from the homepage
 home = requests.get(URL)
@@ -20,6 +22,7 @@ csrf = soup.find(attrs={"name": "login_csrf"})['value']
 f = open('secrets', 'r')
 username = f.readline().rstrip()
 password = f.readline().rstrip()
+ip = f.readline().rstrip()
 
 # Login, this yields a 303 Status
 login = requests.post(
@@ -45,5 +48,5 @@ if isSuccess.status_code == 302:
     # to go through that page to get the usage data.
     alotment_page = requests.get(URL + "/verbruik/json", cookies=home.cookies)
     alotment = json.loads(alotment_page.text)
-    post(int(alotment["data"]["amount"])/1024)
+    post(math.floor(int(alotment["data"]["amount"])/1024))
 
