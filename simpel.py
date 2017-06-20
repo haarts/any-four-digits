@@ -1,4 +1,5 @@
 import requests
+import json
 from bs4 import BeautifulSoup
 
 URL = "https://mijn.simpel.nl"
@@ -6,6 +7,9 @@ URL = "https://mijn.simpel.nl"
 headers = {
         "User-Agent": "Personal crawler, contact harm@mindshards.com",
         }
+
+def post(data):
+    print(data)
 
 # Get the CSRF token from the homepage
 home = requests.get(URL)
@@ -39,5 +43,7 @@ isSuccess = requests.get(URL,
 if isSuccess.status_code == 302:
     # The browser follows the 302 and fetches the URL yet again. We don't need
     # to go through that page to get the usage data.
-    alotment = requests.get(URL + "/verbruik/json", cookies=home.cookies)
-    print(alotment.text)
+    alotment_page = requests.get(URL + "/verbruik/json", cookies=home.cookies)
+    alotment = json.loads(alotment_page.text)
+    post(int(alotment["data"]["amount"])/1024)
+
